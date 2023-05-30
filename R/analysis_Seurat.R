@@ -19,3 +19,19 @@ runSeuratClust = function(obj, red = "pca", ncomp = 10){
   obj = SetIdent(obj, value = paste0(red, ncomp, "_res.0.3"))
   return(obj)
 }
+
+
+# remove normalisation (go from data to counts in RNA assay)
+## works cell by cell
+removeNorm = function(r, N = 10) {
+  r = expm1(r)
+  h = as.data.frame(table(r))
+  h$r = as.numeric(as.character(h$r))
+  h = h[order(h$r, decreasing = F),]
+  N_ = min(nrow(h), N)
+  y = head(h$r, N_)
+  x = seq_len(N_)
+  s = coef(lm(x ~ y))[2]
+  
+  return(r*s)
+}
