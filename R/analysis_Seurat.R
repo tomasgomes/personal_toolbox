@@ -35,3 +35,36 @@ removeNorm = function(r, N = 10) {
   
   return(r*s)
 }
+
+
+
+# Replace gene names in different slots of a Seurat object.
+## gene_match_table has two columns: original_names and new_names
+RenameGenesSeurat = function(obj, gene_match_table){ 
+  # change assays
+  for(n in SeuratObject::Assays(obj)){
+    g_use = gene_match_table[match(rownames(obj[[n]]@counts), gene_match_table[,1]),2]
+    rownames(obj[[n]]@counts) = g_use
+    g_use = gene_match_table[match(rownames(obj[[n]]@data), gene_match_table[,1]),2]
+    rownames(obj[[n]]@data) = g_use
+    g_use = gene_match_table[match(rownames(obj[[n]]@scale.data), gene_match_table[,1]),2]
+    rownames(obj[[n]]@scale.data) = g_use
+    g_use = gene_match_table[match(rownames(obj[[n]]@meta.features), gene_match_table[,1]),2]
+    rownames(obj[[n]]@meta.features) = g_use
+    g_use = gene_match_table[match(obj[[n]]@var.features, gene_match_table[,1]),2]
+    obj[[n]]@var.features = g_use
+  }
+  
+  # change reductions
+  for(n in SeuratObject::Reductions(obj)){
+    g_use = gene_match_table[match(rownames(obj[[n]]@feature.loadings), gene_match_table[,1]),2]
+    rownames(obj[[n]]@feature.loadings) = g_use
+    g_use = gene_match_table[match(rownames(obj[[n]]@feature.loadings.projected), 
+                                   gene_match_table[,1]),2]
+    rownames(obj[[n]]@feature.loadings.projected) = g_use
+  }
+  
+  return(obj)
+}
+
+
