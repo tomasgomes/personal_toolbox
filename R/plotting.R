@@ -1,3 +1,7 @@
+##### FORMATTING #####
+breakStr = function(s, n = 20) {return(gsub(paste0('(.{1,',as.character(n),'})(\\s|$)'), '\\1\n', s))}
+
+
 ##### QUALITY CONTROL #####
 
 plotCountsGenes = function(obj){
