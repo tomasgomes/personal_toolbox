@@ -57,6 +57,25 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", g.pat = c("","")){
 }
 
 
+# apply QC filters
+applyQC = function(obj, thr_list){
+  cond = rep(T, ncol(obj))
+  l = list()
+  for(n in names(thr_list)){
+    l[[n]] = (obj@meta.data[,n]>thr_list[[n]][1]) & 
+      (obj@meta.data[,n]<thr_list[[n]][2])
+    cond = cond & 
+      (obj@meta.data[,n]>thr_list[[n]][1]) & 
+      (obj@meta.data[,n]<thr_list[[n]][2])
+  }
+  print(sapply(l, table))
+  
+  message(paste0("Removed ", sum(!cond), " out of ", length(cond), " cells."))
+  
+  return(obj[,cond])
+}
+
+
 basicSeurat = function(obj){
   obj = suppressWarnings(SCTransform(obj, do.correct.umi = T, vars.to.regress = "nCount_RNA",
                                      verbose = F, variable.features.rv.th = 1,
@@ -75,6 +94,37 @@ runSeuratClust = function(obj, red = "pca", ncomp = 10){
   # setting a more sensible identity as default
   obj = SetIdent(obj, value = paste0(red, ncomp, "_res.0.3"))
   return(obj)
+}
+
+
+# use DoubletFinder to classify droplets as doublets
+removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
+  require(DoubletFinder)
+  
+  # parameter sweep for optimal pK
+  sweep.res = paramSweep_v3(obj, PCs = 1:ncomp, sct = sct)
+  sweep.stats = summarizeSweep(sweep.res, GT = FALSE)
+  bcmvn = find.pK(sweep.stats)
+  bcmvn.max = bcmvn[which.max(bcmvn$BCmetric),]
+  optimal.pk = bcmvn.max$pK
+  optimal.pk = as.numeric(levels(optimal.pk))[optimal.pk]
+  
+  # homeotypic doublets
+  homotypic.prop = modelHomotypic(obj$seurat_clusters)
+  nExp_poi = round(homotypic.prop*ncol(obj))
+  nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
+  
+  #classify
+  res = doubletFinder_v3(obj, PCs = 1:ncomp, pK = optimal.pk, 
+                         nExp = nExp_poi_D1, 
+                         reuse.pANN = FALSE, sct = sct)
+  
+  if(filter.obj){
+    varuse = grep("DF.classifications_", colnames(res@meta.data), value = T)
+    res = res[,res@meta.data[,varuse]=="Singlet"]
+  }
+  
+  return(res)
 }
 
 

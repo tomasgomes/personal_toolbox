@@ -40,7 +40,7 @@ plotCountsGenes = function(obj){
   
   cnt_vln = ggplot(df, aes(x = "", y = nCount_RNA))+
     geom_violin(fill = "grey80")+ scale_y_log10()+
-    geom_jitter(size = 0.33, alpha = 0.33)+
+    geom_jitter(size = 0.3, alpha = 0.33)+
     labs(y = "# counts", x = "")+
     theme_bw()+
     theme(aspect.ratio = 3,
@@ -49,7 +49,7 @@ plotCountsGenes = function(obj){
   
   fea_vln = ggplot(df, aes(x = "", y = nFeature_RNA))+
     geom_violin(fill = "grey80")+ scale_y_log10()+
-    geom_jitter(size = 0.33, alpha = 0.33)+
+    geom_jitter(size = 0.3, alpha = 0.33)+
     labs(y = "# features", x = "")+
     theme_bw()+
     theme(aspect.ratio = 3,
@@ -61,19 +61,26 @@ plotCountsGenes = function(obj){
 }
 
 plotVar = function(obj, var.use = "percent.mt", lab.use = "MT genes [%]"){
-  df = data.frame("percent.mt" = obj@meta.data[,var.use])
-  df = df[order(df$percent.mt, decreasing = F),,drop = F]
-  
-  mt_plt = ggplot(df, aes(x = "", y = percent.mt))+
-    geom_violin(fill = "grey80")+
-    geom_jitter(size = 0.33, alpha = 0.33)+
-    labs(y = lab.use, x = "")+
-    theme_bw()+
-    theme(aspect.ratio = 3,
-          axis.text = element_text(colour = "black"),
-          axis.ticks.x = element_blank())
-  
-  res = list(mt_plt = mt_plt)
+  if(length(var.use)!=length(lab.use)){
+    stop("var.use and lab.use must have the same length.")
+  }
+  res = list()
+  for(v in 1:length(var.use)){
+    vn = var.use[v]
+    df = data.frame("v" = obj@meta.data[,vn])
+    df = df[order(df$v, decreasing = F),,drop = F]
+    
+    plt = ggplot(df, aes(x = "", y = v))+
+      geom_violin(fill = "grey80")+
+      geom_jitter(size = 0.3, alpha = 0.33)+
+      labs(y = lab.use[v], x = "")+
+      theme_bw()+
+      theme(aspect.ratio = 3,
+            axis.text = element_text(colour = "black"),
+            axis.ticks.x = element_blank())
+    res[[vn]] = plt
+  }
+
   return(res)
 }
 
