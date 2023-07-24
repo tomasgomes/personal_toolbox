@@ -116,7 +116,7 @@ removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
   
   #classify
   res = doubletFinder_v3(obj, PCs = 1:ncomp, pK = optimal.pk, 
-                         nExp = nExp_poi_D1, 
+                         nExp = nExp_poi, 
                          reuse.pANN = FALSE, sct = sct)
   
   if(filter.obj){
