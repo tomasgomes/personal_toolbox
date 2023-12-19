@@ -22,7 +22,7 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
                                                 value = T)))
   
   # scores
-  if(!isnull(mt.pat)){
+  if(!is.null(mt.pat)){
     obj = Seurat::PercentageFeatureSet(obj, pattern = mt.pat, 
                                        col.name = "percent.mt", assay = "RNA")
   }
