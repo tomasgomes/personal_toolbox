@@ -2,7 +2,7 @@
 
 # obtain basic Seurat QC metrics
 ## setub mostly for human, and genes in ENS000-NAME format
-basicQCSeurat = function(obj, mt.pat = "-MT-", g.pat = c("","")){
+basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("","")){
   # ribosomal genes
   ## obtained from https://www.genenames.org/data/genegroup/#!/group/728
   ## and https://www.genenames.org/data/genegroup/#!/group/729
@@ -22,10 +22,14 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", g.pat = c("","")){
                                                 value = T)))
   
   # scores
-  obj = Seurat::PercentageFeatureSet(obj, pattern = mt.pat, 
-                                     col.name = "percent.mt", assay = "RNA")
-  obj = Seurat::PercentageFeatureSet(obj, col.name = "percent.rb", 
-                                     assay = "RNA", features = rb_genes_obj)
+  if(!isnull(mt.pat)){
+    obj = Seurat::PercentageFeatureSet(obj, pattern = mt.pat, 
+                                       col.name = "percent.mt", assay = "RNA")
+  }
+  if(calc.ribo){
+    obj = Seurat::PercentageFeatureSet(obj, col.name = "percent.rb", 
+                                       assay = "RNA", features = rb_genes_obj)
+  }
   
   # cell cycle scoring
   # might have trouble with bins so running iteratively until it works
