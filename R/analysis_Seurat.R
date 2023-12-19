@@ -20,7 +20,6 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
                                function(x) grep(paste0(g.pat[1],x,g.pat[2]), 
                                                 rownames(obj[["RNA"]]), 
                                                 value = T)))
-  
   # scores
   if(!is.null(mt.pat)){
     obj = Seurat::PercentageFeatureSet(obj, pattern = mt.pat, 
@@ -37,10 +36,12 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
   s.genes_obj = unlist(sapply(s.genes, 
                               function(x) grep(x, rownames(obj[["RNA"]]), 
                                                value = T)))
+
   g2m.genes = paste0(g.pat[1], cc.genes$g2m.genes, g.pat[2])
   g2m.genes_obj = unlist(sapply(g2m.genes, 
                                 function(x) grep(x, rownames(obj[["RNA"]]), 
                                                  value = T)))
+
   bins = 24
   while(T){
     objwsc = tryCatch({Seurat::CellCycleScoring(obj, nbin = bins, assay = "RNA",
@@ -52,7 +53,7 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
     if(is.numeric(objwsc) & bins>6){
       bins = bins-2
     } else{
-      obj = objwsc
+      obj = if(!is.numeric(objwsc)) objwsc else obj
       break
     }
   }
