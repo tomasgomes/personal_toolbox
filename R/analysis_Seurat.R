@@ -107,7 +107,7 @@ removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
   require(DoubletFinder)
   
   # parameter sweep for optimal pK
-  sweep.res = paramSweep_v3(obj, PCs = 1:ncomp, sct = sct)
+  sweep.res = paramSweep(obj, PCs = 1:ncomp, sct = sct)
   sweep.stats = summarizeSweep(sweep.res, GT = FALSE)
   bcmvn = find.pK(sweep.stats)
   bcmvn.max = bcmvn[which.max(bcmvn$BCmetric),]
@@ -120,9 +120,8 @@ removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
   nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
   
   #classify
-  res = doubletFinder_v3(obj, PCs = 1:ncomp, pK = optimal.pk, 
-                         nExp = nExp_poi, 
-                         reuse.pANN = FALSE, sct = sct)
+  res = doubletFinder(obj, PCs = 1:ncomp, pK = optimal.pk, nExp = nExp_poi, 
+                      reuse.pANN = FALSE, sct = sct)
   
   if(filter.obj){
     varuse = grep("DF.classifications_", colnames(res@meta.data), value = T)
