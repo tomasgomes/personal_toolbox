@@ -30,6 +30,9 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
                                        assay = "RNA", features = rb_genes_obj)
   }
   
+  # basica data normalisation (for cc scoring)
+  obj = NormalizeData(obj, assay = "RNA")
+  
   # cell cycle scoring
   # might have trouble with bins so running iteratively until it works
   s.genes = paste0(g.pat[1], cc.genes$s.genes, g.pat[2])
@@ -42,12 +45,12 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
                                 function(x) grep(x, rownames(obj[["RNA"]]), 
                                                  value = T)))
 
-  bins = 24
+  bins = 30
   while(T){
     objwsc = tryCatch({Seurat::CellCycleScoring(obj, nbin = bins, assay = "RNA",
                                                 s.features = s.genes_obj,
                                                 g2m.features = g2m.genes_obj,
-                                                set.ident = F)},
+                                                set.ident = F, layer = "data")},
                       error = function(e){print(bins)})
     
     if(is.numeric(objwsc) & bins>6){
