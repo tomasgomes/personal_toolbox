@@ -12,7 +12,7 @@ annotationPrompt = function(presto_df, n = 10,
     filter(padj<=pval_thr) |> # only p-value below 0.05
     filter(pct_in>(pct_out+pct_diff)) |> 
     filter(logFC>logFC_thr) |> 
-    arrange(logFC) |>
+    arrange(-logFC) |>
     top_n(n = n, wt = logFC) # top genes per cluster, ranked by logFC
   
   prompt = "I have performed a scRNA-seq analysis, and have encountered various clusters, for which I calculated the marker genes. The top marker genes for each cluster are as follows:\n"
