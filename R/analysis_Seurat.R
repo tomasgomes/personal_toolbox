@@ -31,7 +31,7 @@ basicQCSeurat = function(obj, mt.pat = "-MT-", calc.ribo = TRUE, g.pat = c("",""
   }
   
   # basica data normalisation (for cc scoring)
-  obj = NormalizeData(obj, assay = "RNA")
+  obj = NormalizeData(obj, assay = "RNA", verbose = F)
   
   # cell cycle scoring
   # might have trouble with bins so running iteratively until it works
@@ -101,14 +101,15 @@ runSeuratClust = function(obj, red = "pca", ncomp = 10, max.res = 1.5,
   obj = FindClusters(obj, algorithm = algorithm, verbose = F, 
                      graph.name = paste0(red, ncomp),
                      resolution = seq(0.2, max.res, 0.1), ...)
-  # setting a low resolution as default
-  obj = SetIdent(obj, value = paste0(red, ncomp, "_res.0.3"))
+  # set the highest resolution as default identity
+  obj = SetIdent(obj, value = paste0(red, ncomp, "_res.", max.res))
   return(obj)
 }
 
 
 # use DoubletFinder to classify droplets as doublets
-removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
+removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T, 
+                          cl.use = "seurat_clusters"){
   require(DoubletFinder)
   
   # parameter sweep for optimal pK
@@ -119,8 +120,8 @@ removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T){
   optimal.pk = bcmvn.max$pK
   optimal.pk = as.numeric(levels(optimal.pk))[optimal.pk]
   
-  # homeotypic doublets
-  homotypic.prop = modelHomotypic(obj$seurat_clusters)
+  # homotypic doublets
+  homotypic.prop = modelHomotypic(obj@meta.data[,cl.use])
   nExp_poi = round(homotypic.prop*ncol(obj))
   nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
   
