@@ -109,25 +109,30 @@ runSeuratClust = function(obj, red = "pca", ncomp = 10, max.res = 1.5,
 
 # use DoubletFinder to classify droplets as doublets
 removeDoublets = function(obj, ncomp = 10, sct = T, filter.obj = T, 
+                          n.cores = 1,
                           cl.use = "seurat_clusters"){
   require(DoubletFinder)
   
   # parameter sweep for optimal pK
-  sweep.res = paramSweep(obj, PCs = 1:ncomp, sct = sct)
-  sweep.stats = summarizeSweep(sweep.res, GT = FALSE)
-  bcmvn = find.pK(sweep.stats)
+  sweep.res = suppressMessages(paramSweep(obj, PCs = 1:ncomp, sct = sct, num.cores = n.cores), 
+                               classes = c("message", "warning"))
+  sweep.stats = suppressMessages(summarizeSweep(sweep.res, GT = FALSE), 
+                                 classes = c("message", "warning"))
+  bcmvn = suppressMessages(find.pK(sweep.stats), classes = c("message", "warning"))
   bcmvn.max = bcmvn[which.max(bcmvn$BCmetric),]
   optimal.pk = bcmvn.max$pK
   optimal.pk = as.numeric(levels(optimal.pk))[optimal.pk]
   
   # homotypic doublets
-  homotypic.prop = modelHomotypic(obj@meta.data[,cl.use])
+  homotypic.prop = suppressMessages(modelHomotypic(obj@meta.data[,cl.use]), 
+                                    classes = c("message", "warning"))
   nExp_poi = round(homotypic.prop*ncol(obj))
   nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
   
   #classify
-  res = doubletFinder(obj, PCs = 1:ncomp, pK = optimal.pk, nExp = nExp_poi, 
-                      reuse.pANN = FALSE, sct = sct)
+  res = suppressMessages(doubletFinder(obj, PCs = 1:ncomp, pK = optimal.pk, 
+                                       nExp = nExp_poi, reuse.pANN = FALSE, sct = sct), 
+                         classes = c("message", "warning"))
   
   if(filter.obj){
     varuse = grep("DF.classifications_", colnames(res@meta.data), value = T)
