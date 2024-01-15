@@ -84,10 +84,17 @@ applyQC = function(obj, thr_list){
 }
 
 
-basicSeurat = function(obj){
-  obj = suppressWarnings(SCTransform(obj, do.correct.umi = T, vars.to.regress = "nCount_RNA",
-                                     verbose = F, variable.features.rv.th = 1,
-                                     variable.features.n = NULL, seed.use = 1))
+basicSeurat = function(obj, vars.to.regress = "nCount_RNA", do.correct.umi = T, 
+                       variable.features.rv.th = 1, 
+                       variable.features.n = NULL, 
+                       return.only.var.genes = FALSE, ...){
+  obj = suppressWarnings(SCTransform(obj, verbose = F, 
+                                     do.correct.umi = do.correct.umi, 
+                                     vars.to.regress = vars.to.regress,
+                                     variable.features.rv.th = variable.features.rv.th,
+                                     variable.features.n = variable.features.n, 
+                                     return.only.var.genes = return.only.var.genes,
+                                     seed.use = 1, ...))
   obj = RunPCA(obj, verbose = F)
   return(obj)
 }
