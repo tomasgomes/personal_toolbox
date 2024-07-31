@@ -85,3 +85,37 @@ plotVar = function(obj, var.use = "percent.mt", lab.use = "MT genes [%]"){
 }
 
 
+
+##### SPATIAL #####
+
+# Improved FeaturePlot
+# adapted from Beatriz Val
+plot.exp <- function(obj, list.genes, sample_n = "", thr = 0){
+  plot.list <- list()
+  for (gene in list.genes){
+    print(gene)
+    plt <- SpatialFeaturePlot(obj, features = gene, alpha = 0.7, 
+                              image.alpha = 0.8,   pt.size.factor = 2.5, 
+                              keep.scale = 'all', images = "Slice") +
+      scale_fill_viridis_c(option = 'A', end = 0.9, direction = -1, 
+                           na.value = "#FFFFFF33") +
+      theme(legend.position = "inside",
+            legend.position.inside = c(1,0), legend.justification = c(1,0), 
+            panel.grid = element_blank(), 
+            legend.title = element_text(size = 9, face = "bold"),
+            legend.text = element_text(size = 8))
+    
+    if(sample_n!=""){
+      plt=plt+labs(title = paste0(sample_n, ' ', gene))
+    }
+    
+    plot.list[[gene]] <- plt
+    
+    # ensure that values below threshold (i.e. no expression) are NA to appear transparent
+    plot.list[[gene]][[1]]$data[,gene][plot.list[[gene]][[1]]$data[,gene]<=thr] = NA
+    plot.list[[gene]][[1]]$layers[[1]]$data[,gene][plot.list[[gene]][[1]]$layers[[1]]$data[,gene]<=thr] = NA
+  }
+  return(plot.list)
+}
+
+
