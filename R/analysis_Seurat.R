@@ -103,10 +103,12 @@ runSeuratClust = function(obj, red = "pca", ncomp = 10, max.res = 1.5,
                           algorithm = 2, ...){
   if(ncomp=="all"){ncomp = ncol(Embeddings(obj, red))}
   obj = FindNeighbors(obj, dims = 1:ncomp, force.recalc = T, verbose = F,
-                      reduction = red, graph.name = paste0(red, ncomp))
+                      reduction = red, 
+                      graph.name = c(paste0("KNN_", red, ncomp), 
+                                     paste0("SNN_", red, ncomp)))
   obj = RunUMAP(obj, dims = 1:ncomp, reduction = red, verbose = F)
   obj = FindClusters(obj, algorithm = algorithm, verbose = F, 
-                     graph.name = paste0(red, ncomp),
+                     graph.name = paste0("SNN_", red, ncomp),
                      resolution = seq(0.2, max.res, 0.1), ...)
   # set the highest resolution as default identity
   obj = SetIdent(obj, value = paste0(red, ncomp, "_res.", max.res))
